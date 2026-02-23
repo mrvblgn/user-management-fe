@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 
+export const runtime = 'nodejs';
+
 // Korunan rotalar
 const protectedRoutes = ["/dashboard", "/api/users"];
 

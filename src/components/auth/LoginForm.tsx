@@ -29,7 +29,8 @@ export default function LoginForm() {
         throw new Error(data.error || "Login failed");
       }
 
-      router.push("/dashboard");
+      // Cookie set edildiğinden emin olmak için tam sayfa yenileme
+      window.location.href = "/dashboard";
     } catch (submitError) {
       const message =
         submitError instanceof Error ? submitError.message : "Login failed";

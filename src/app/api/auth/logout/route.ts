@@ -10,8 +10,8 @@ export async function POST() {
     // Token cookie'sini sil
     response.cookies.set("token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       path: "/",
       maxAge: 0, // Cookie'yi hemen sil
     });

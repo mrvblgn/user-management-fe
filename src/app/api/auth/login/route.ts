@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
     // JWT token'ı httpOnly cookie'ye ayarla
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false, // localhost için false (production'da nginx/reverse proxy HTTPS handle eder)
+      sameSite: "lax",
       path: "/",
       maxAge: 60 * 60, // 1 saat
     });
