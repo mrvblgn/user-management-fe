@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { UserResponse } from "@/repositories/user.repository";
 
 interface DashboardViewProps {
@@ -33,6 +36,16 @@ export default function DashboardView({
   age,
 }: DashboardViewProps) {
   const hasUsers = users.length > 0;
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -65,6 +78,12 @@ export default function DashboardView({
                 <span className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-zinc-950">
                   Toplam {total} kullanıcı
                 </span>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-full border border-red-500/30 px-5 py-2 text-sm font-medium text-red-300 transition hover:border-red-500/50 hover:bg-red-500/10"
+                >
+                  Çıkış Yap
+                </button>
               </div>
             </div>
             <p className="max-w-2xl text-base text-zinc-300">

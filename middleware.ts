@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 
 // Korunan rotalar
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/api/users"];
 
 // Public rotalar (korumasız)
 const publicRoutes = ["/"];
 
-// Auth rotaları (login, logout)
+// Auth rotaları (login, logout) - token kontrolü yapılmayan
 const authRoutes = ["/api/auth/login", "/api/auth/logout"];
 
 export function middleware(request: NextRequest) {

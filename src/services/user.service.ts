@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/hash";
 import {
@@ -21,6 +22,30 @@ export class UploadValidationError extends Error {
     this.name = "UploadValidationError";
   }
 }
+
+const excelRowSchema = z.object({
+  firstName: z
+    .string()
+    .trim()
+    .min(1, "firstName zorunludur")
+    .transform((val) => val.trim()),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, "lastName zorunludur")
+    .transform((val) => val.trim()),
+  email: z
+    .string()
+    .trim()
+    .email("email geçersiz")
+    .transform((val) => val.toLowerCase().trim()),
+  age: z.number().int("age tam sayı olmalı").positive("age pozitif olmalı"),
+  password: z
+    .string()
+    .trim()
+    .min(6, "password en az 6 karakter olmalı")
+    .transform((val) => val.trim()),
+});
 
 export class UserService {
   constructor(private userRepository: UserRepository) {}
@@ -67,45 +92,38 @@ export class UserService {
     const emailRowMap = new Map<string, number>();
 
     for (const row of rows) {
-      const firstName = String(row.firstName ?? "").trim();
-      const lastName = String(row.lastName ?? "").trim();
-      const email = String(row.email ?? "").trim().toLowerCase();
-      const password = String(row.password ?? "").trim();
-      const ageNumber = Number(row.age);
+      // Önce unknown değerleri string/number'a çevir
+      const rawData = {
+        firstName: String(row.firstName ?? ""),
+        lastName: String(row.lastName ?? ""),
+        email: String(row.email ?? ""),
+        age: Number(row.age),
+        password: String(row.password ?? ""),
+      };
 
-      if (!firstName) {
-        throw new UploadValidationError(row.rowNumber, "firstName zorunludur");
-      }
-      if (!lastName) {
-        throw new UploadValidationError(row.rowNumber, "lastName zorunludur");
-      }
-      if (!email) {
-        throw new UploadValidationError(row.rowNumber, "email zorunludur");
-      }
-      if (!/^\S+@\S+\.\S+$/.test(email)) {
-        throw new UploadValidationError(row.rowNumber, "email geçersiz");
-      }
-      if (!Number.isInteger(ageNumber) || ageNumber <= 0) {
-        throw new UploadValidationError(row.rowNumber, "age geçersiz");
-      }
-      if (!password) {
-        throw new UploadValidationError(row.rowNumber, "password zorunludur");
+      // Zod ile validate et
+      const validationResult = excelRowSchema.safeParse(rawData);
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.issues[0];
+        throw new UploadValidationError(
+          row.rowNumber,
+          firstError?.message || "Validasyon hatası"
+        );
       }
 
-      if (emailRowMap.has(email)) {
+      const validated = validationResult.data;
+
+      if (emailRowMap.has(validated.email)) {
         throw new UploadValidationError(
           row.rowNumber,
           "dosyada tekrar eden email var"
         );
       }
 
-      emailRowMap.set(email, row.rowNumber);
+      emailRowMap.set(validated.email, row.rowNumber);
       normalized.push({
-        firstName,
-        lastName,
-        email,
-        age: ageNumber,
-        password,
+        ...validated,
         rowNumber: row.rowNumber,
       });
     }

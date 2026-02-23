@@ -10,7 +10,7 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     setIsLoading(true);
@@ -43,9 +43,9 @@ export default function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 text-zinc-900">
       <main className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Giris</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Giriş</h1>
           <p className="mt-2 text-sm text-zinc-500">
-            Hesabiniza erismek icin giris yapin.
+            Hesabınıza erişmek için giriş yapın.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function LoginForm() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium" htmlFor="password">
-              Sifre
+              Şifre
             </label>
             <input
               id="password"
@@ -95,7 +95,7 @@ export default function LoginForm() {
             disabled={isLoading}
             className="h-11 w-full rounded-lg bg-zinc-900 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isLoading ? "Giris yapiliyor..." : "Giris yap"}
+            {isLoading ? "Giriş yapılıyor..." : "Giriş yap"}
           </button>
         </form>
       </main>
