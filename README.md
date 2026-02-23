@@ -1,36 +1,258 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# User Management System
 
-## Getting Started
+A full-stack user management application built with Next.js 16, TypeScript, PostgreSQL, and Docker.
 
-First, run the development server:
+## 🚀 Features
+
+### Authentication
+- JWT-based authentication with httpOnly cookies
+- Login/logout functionality
+- Protected routes with middleware
+- Secure password hashing (bcryptjs)
+
+### User Management
+- **Dashboard**: View paginated user list with age filtering
+- **Add User**: Create single user with form validation (React Hook Form + Zod)
+- **Bulk Upload**: Import users via Excel file with row-level validation
+- **User Details**: View individual user information
+
+### Technical Features
+- Clean Architecture (Repository → Service → API pattern)
+- Transaction support for bulk operations
+- Duplicate email detection (both in-file and database)
+- Error handling with specific row numbers for Excel uploads
+- Type-safe with TypeScript
+- Server-side rendering with Next.js App Router
+- Responsive UI with TailwindCSS
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 16.1.6 (App Router, Turbopack)
+- **Language**: TypeScript
+- **Database**: PostgreSQL + Prisma ORM 6
+- **Authentication**: JWT (jsonwebtoken)
+- **Validation**: Zod + React Hook Form
+- **Styling**: TailwindCSS 4
+- **Excel Parsing**: XLSX
+- **Containerization**: Docker + Docker Compose
+
+## 📋 Prerequisites
+
+- Docker 20.10+
+- Docker Compose 2.0+
+
+## 🚀 Quick Start
+
+### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repository-url>
+cd user-managment-fe
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Environment Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Start with Docker
 
-## Learn More
+```bash
+docker-compose up -d
+```
 
-To learn more about Next.js, take a look at the following resources:
+This will:
+- Build the Next.js application
+- Start PostgreSQL database
+- Run migrations automatically
+- Seed initial data
+- Launch the application on http://localhost:3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Access the Application
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open your browser and navigate to:
+```
+http://localhost:3000
+```
 
-## Deploy on Vercel
+### 5. Login
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Use the default admin credentials:
+```
+Email: admin@example.com
+Password: admin
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧪 Development
+
+### Run locally without Docker
+
+```bash
+# Install dependencies
+npm install
+
+# Start PostgreSQL (via Docker)
+docker-compose up db -d
+
+# Run migrations
+npx prisma migrate dev
+
+# Seed database
+npx prisma db seed
+
+# Start development server
+npm run dev
+```
+
+Application will be available at http://localhost:3000
+
+### Database Management
+
+```bash
+# View database in Prisma Studio
+npx prisma studio
+
+# Create new migration
+npx prisma migrate dev --name migration_name
+
+# Reset database
+npx prisma migrate reset
+```
+
+## 📦 Docker Commands
+
+```bash
+# Start services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# Rebuild and start
+docker-compose up --build -d
+
+# View logs
+docker-compose logs -f app
+
+# Check container status
+docker-compose ps
+
+# Remove all data (including database)
+docker-compose down -v
+```
+
+## 📁 Project Structure
+
+```
+user-managment-fe/
+├── src/
+│   ├── app/                      # Next.js App Router
+│   │   ├── page.tsx             # Login page
+│   │   ├── dashboard/           # Dashboard routes
+│   │   │   ├── page.tsx        # User list
+│   │   │   ├── add/            # Add single user
+│   │   │   ├── addMany/        # Excel bulk upload
+│   │   │   └── [userId]/       # User detail
+│   │   └── api/                 # API routes
+│   │       ├── auth/           # Login/Logout
+│   │       └── users/          # User CRUD
+│   ├── components/              # React components
+│   ├── lib/                     # Utilities
+│   │   ├── jwt.ts              # JWT token management
+│   │   ├── hash.ts             # Password hashing
+│   │   └── prisma.ts           # Prisma client
+│   ├── repositories/            # Data access layer
+│   ├── services/                # Business logic layer
+│   ├── types/                   # TypeScript types
+│   └── validations/             # Zod schemas
+├── prisma/
+│   ├── schema.prisma           # Database schema
+│   ├── seed.ts                 # Seed script
+│   └── migrations/             # Migration files
+├── Dockerfile                   # Docker configuration
+├── docker-compose.yml          # Service orchestration
+└── middleware.ts               # Route protection
+```
+
+## 🌐 API Endpoints
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+
+### Users
+- `POST /api/users` - Create single user
+- `POST /api/users/upload` - Bulk upload via Excel
+
+### Health
+- `GET /api/health` - Health check endpoint
+
+## 📝 Excel Upload Format
+
+The Excel file should contain the following columns:
+
+| firstName | lastName | email | age | password |
+|-----------|----------|-------|-----|----------|
+| John | Doe | john@example.com | 30 | pass123 |
+| Jane | Smith | jane@example.com | 25 | pass456 |
+
+**Validation Rules:**
+- All fields are required
+- Email must be valid format
+- Age must be a positive integer
+- Password minimum 6 characters
+- No duplicate emails (within file or database)
+
+**Error Handling:**
+- If any row fails validation, no users are added (transaction rollback)
+- Error messages include specific row numbers
+
+## 🔒 Security Features
+
+- JWT tokens stored in httpOnly cookies
+- Password hashing with bcryptjs (10 salt rounds)
+- CSRF protection with SameSite cookies
+- Middleware-based route protection
+- SQL injection prevention (Prisma ORM)
+- Input validation on both client and server
+
+## 🎨 UI Features
+
+- Responsive design (mobile-friendly)
+- Dark theme with modern aesthetics
+- Form validation with real-time feedback
+- Loading states and error messages
+- Pagination controls
+- Age-based filtering
+
+## 🚀 Deployment
+
+The application is production-ready with Docker. For deployment:
+
+1. Update environment variables in `docker-compose.yml`:
+   - Set a strong `JWT_SECRET`
+   - Configure production `DATABASE_URL`
+
+2. Deploy with Docker:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. (Optional) Use a reverse proxy (nginx/traefik) for HTTPS
+
+## 🧹 Cleanup
+
+To remove all containers and data:
+
+```bash
+docker-compose down -v
+```
+
+## 📄 License
+
+This project is created as a technical assessment.
+
+## 👤 Author
+
+Merve Bilgin
