@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export interface CreateUserInput {
@@ -113,6 +113,38 @@ export class UserRepository {
     return users;
   }
 
+  async countUsers(age?: number): Promise<number> {
+    const where = age ? { age } : undefined;
+    return prisma.user.count({ where });
+  }
+
+  async findPaginated(
+    page: number,
+    pageSize: number,
+    age?: number
+  ): Promise<UserResponse[]> {
+    const where = age ? { age } : undefined;
+    const skip = (page - 1) * pageSize;
+
+    return prisma.user.findMany({
+      where,
+      skip,
+      take: pageSize,
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        age: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
   /**
    * Kullanıcıyı güncelle
    * Şifre döndürmez
@@ -146,5 +178,44 @@ export class UserRepository {
     await prisma.user.delete({
       where: { id },
     });
+  }
+
+  async findExistingEmails(
+    emails: string[],
+    tx?: Prisma.TransactionClient
+  ): Promise<string[]> {
+    if (emails.length === 0) {
+      return [];
+    }
+
+    const client = tx ?? prisma;
+    const results = await client.user.findMany({
+      where: {
+        email: {
+          in: emails,
+        },
+      },
+      select: {
+        email: true,
+      },
+    });
+
+    return results.map((item) => item.email);
+  }
+
+  async createMany(
+    data: CreateUserInput[],
+    tx?: Prisma.TransactionClient
+  ): Promise<number> {
+    if (data.length === 0) {
+      return 0;
+    }
+
+    const client = tx ?? prisma;
+    const result = await client.user.createMany({
+      data,
+    });
+
+    return result.count;
   }
 }

@@ -1,4 +1,5 @@
 import { AuthService } from "./auth.service";
+import { UserService } from "./user.service";
 import { UserRepository } from "@/repositories/user.repository";
 
 /**
@@ -12,5 +13,10 @@ export class ServiceFactory {
   static createAuthService(): AuthService {
     const userRepository = new UserRepository();
     return new AuthService(userRepository);
+  }
+
+  static createUserService(): UserService {
+    const userRepository = new UserRepository();
+    return new UserService(userRepository);
   }
 }
